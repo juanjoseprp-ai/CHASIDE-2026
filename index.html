@@ -86,7 +86,7 @@ function prog(){const n=get().filter(v=>v!==null).length;$("pb").style.width=n/9
 qs.addEventListener("change",prog);
 function show(id){["v1","v2"].forEach(v=>$(v).classList.toggle("hide",v!=id))}
 $("t1").onclick=()=>show("v1");
-const CFG={mode:"firebase",apiUrl:"/api/respuestas",adminPass:"CAMBIA-ESTA-CLAVE"}; // mode: "firebase" (en línea) | "api" (server.js) | "local" (pruebas)
+const CFG={mode:"firebase",apiUrl:"/api/respuestas",adminPass:"juancito"}; // mode: "firebase" (en línea) | "api" (server.js) | "local" (pruebas)
 let adminPass="";
 const store={
 async save(id,d){if(CFG.mode=="firebase"){if(!window.FB)throw new Error("Firebase no cargó o falta configurar firebaseConfig");await FB.setDoc(FB.doc(FB.db,"respuestas",id),d)}
