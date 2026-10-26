@@ -41,7 +41,9 @@ th,td{border-bottom:1px solid var(--bd);padding:6px 8px;text-align:center;white-
 <div class="card mu">Lee cada pregunta y responde Sí o No pensando en el tipo de profesión o la actitud que implica. Responde todas las preguntas.</div>
 <div id="stat" class="card hide"></div>
 <div class="card"><label>Nombre completo<input type="text" id="nom" autocomplete="name"></label>
-<label>Grado y Sección<input type="text" id="cur"></label></div>
+<label>Grado y Sección<input type="text" id="cur"></label>
+<label>Mencione 2 carreras universitarias de su preferencia <span class="mu">(opcional)</span><input type="text" id="uni" maxlength="150"></label>
+<label>Mencione 2 carreras técnicas y/o pedagógicas de su preferencia <span class="mu">(opcional)</span><input type="text" id="tec" maxlength="150"></label></div>
 <div class="bar"><div class="pg"><div id="pb"></div></div><div class="mu" id="pt">0 / 98</div></div>
 <div class="card" id="qs"></div>
 <button id="env">Enviar respuestas</button> <span id="msg" class="mu"></span>
@@ -107,7 +109,7 @@ if(miss.length){$("msg").textContent=`Faltan ${miss.length} preguntas (marcadas 
 $("env").disabled=true;$("msg").textContent="Guardando…";
 const c=calc(a);const id="r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const sc={};L.split("").forEach(l=>{sc[l+"_int"]=c.r[l].i;sc[l+"_apt"]=c.r[l].p;sc[l]=c.r[l].t});
-try{await store.save(id,{nombre:nom,curso:cur,fecha:new Date().toISOString(),resp:a.join(""),area1:c.top[0],area2:c.top[1],...sc});
+try{await store.save(id,{nombre:nom,curso:cur,univ:$("uni").value.trim(),tecn:$("tec").value.trim(),fecha:new Date().toISOString(),resp:a.join(""),area1:c.top[0],area2:c.top[1],...sc});
 $("msg").textContent="✔ Respuestas guardadas.";showRes(c)}catch(e){$("env").disabled=false;$("msg").textContent="Error al guardar: "+(e.message||e.code)}};
 let rows=[];
 function renderAdmin(){rows.sort((a,b)=>a.fecha<b.fecha?1:-1);$("cnt").textContent=rows.length+" encuestados";
@@ -120,9 +122,9 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 $("dl").onclick=()=>{
 const LL=L.split(""),f2=v=>String(v).padStart(2,"0"),fd=x=>{const d=new Date(x);return isNaN(d)?"":f2(d.getDate())+"/"+f2(d.getMonth()+1)+"/"+d.getFullYear()};
 const top=(r,k,o)=>LL.slice().sort((x,y)=>r[y+k]-r[x+k]||r[y+o]-r[x+o]).slice(0,2).join(" - ");
-const A=[["Nombre","Curso","Fecha","INTERESES",...Array(7).fill(""),"APTITUDES",...Array(7).fill("")],["","","",...LL,"Resultado",...LL,"Resultado"],...rows.map(r=>[r.nombre,r.curso,fd(r.fecha),...LL.map(l=>r[l+"_int"]),top(r,"_int","_apt"),...LL.map(l=>r[l+"_apt"]),top(r,"_apt","_int")])];
-const B=[["Nombre","Curso",...Q.map((_,i)=>"P"+(i+1))],...rows.map(r=>[r.nombre,r.curso,...r.resp.split("").map(x=>x=="1"?"Sí":"No")])];
-const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(A);ws["!merges"]=[{s:{r:0,c:3},e:{r:0,c:10}},{s:{r:0,c:11},e:{r:0,c:18}},{s:{r:0,c:0},e:{r:1,c:0}},{s:{r:0,c:1},e:{r:1,c:1}},{s:{r:0,c:2},e:{r:1,c:2}}];ws["!cols"]=[{wch:28},{wch:10},{wch:11},...Array(7).fill({wch:4}),{wch:12},...Array(7).fill({wch:4}),{wch:12}];XLSX.utils.book_append_sheet(wb,ws,"Resultados");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(B),"Respuestas");
+const A=[["Nombre","Curso","Fecha","Carreras universitarias (2)","Carreras técnicas y/o pedagógicas (2)","INTERESES",...Array(7).fill(""),"APTITUDES",...Array(7).fill("")],["","","","","",...LL,"Resultado",...LL,"Resultado"],...rows.map(r=>[r.nombre,r.curso,fd(r.fecha),r.univ||"",r.tecn||"",...LL.map(l=>r[l+"_int"]),top(r,"_int","_apt"),...LL.map(l=>r[l+"_apt"]),top(r,"_apt","_int")])];
+const B=[["Nombre","Curso","Carreras universitarias (2)","Carreras técnicas y/o pedagógicas (2)",...Q.map((_,i)=>"P"+(i+1))],...rows.map(r=>[r.nombre,r.curso,r.univ||"",r.tecn||"",...r.resp.split("").map(x=>x=="1"?"Sí":"No")])];
+const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(A);ws["!merges"]=[{s:{r:0,c:5},e:{r:0,c:12}},{s:{r:0,c:13},e:{r:0,c:20}},...[0,1,2,3,4].map(c=>({s:{r:0,c},e:{r:1,c}}))];ws["!cols"]=[{wch:28},{wch:10},{wch:11},{wch:32},{wch:32},...Array(7).fill({wch:4}),{wch:12},...Array(7).fill({wch:4}),{wch:12}];XLSX.utils.book_append_sheet(wb,ws,"Resultados");XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(B),"Respuestas");
 XLSX.writeFile(wb,"chaside_resultados.xlsx")};
 async function load(){try{rows=await store.all();renderAdmin()}catch(e){$("cnt").textContent="Error: "+e.message}}
 $("rf").onclick=load;
